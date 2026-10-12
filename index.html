@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Controle Financeiro Avançado</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="auth" class="card">
+    <h1>Controle Financeiro</h1>
+    <p class="empty">Entre para ver e organizar suas finanças. Os dados ficam salvos neste navegador.</p>
+    <div class="tabs">
+      <button id="tabEntrar" class="on" type="button">Entrar</button>
+      <button id="tabCriar" type="button">Criar conta</button>
+    </div>
+    <div id="campoNome" hidden>
+      <label for="authNome">Nome ou empresa</label>
+      <input id="authNome" autocomplete="name">
+    </div>
+    <label for="authEmail">E-mail</label>
+    <input id="authEmail" type="email" autocomplete="email">
+    <label for="authSenha">Senha (mínimo 6 caracteres)</label>
+    <input id="authSenha" type="password" autocomplete="current-password">
+    <div class="msg" id="authMsg" role="alert"></div>
+    <button id="authEnviar" type="button">Entrar</button>
+    <button id="authDemo" type="button" class="ghost full">Entrar com conta de demonstração</button>
+  </section>
+
+  <main id="app" hidden>
+    <div class="top">
+      <div><h1 id="saudacao"></h1><span class="empty">Visão do mês selecionado</span></div>
+      <div class="inline">
+        <input id="mes" type="month" aria-label="Mês" style="width:auto">
+        <button id="sair" class="ghost" type="button">Sair</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><small>Saldo acumulado</small><b id="resAcumulado"></b></div>
+      <div class="stat"><small>Receitas do mês</small><b id="resReceitas" class="inc"></b></div>
+      <div class="stat"><small>Despesas do mês</small><b id="resDespesas" class="exp"></b></div>
+      <div class="stat"><small>Resultado do mês</small><b id="resResultado"></b></div>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Nova transação</h2>
+        <label for="trDescricao">Descrição</label>
+        <input id="trDescricao" placeholder="Ex.: Mercado">
+        <div class="row">
+          <div><label for="trValor">Valor (R$)</label><input id="trValor" type="number" step="0.01" min="0.01"></div>
+          <div><label for="trTipo">Tipo</label>
+            <select id="trTipo"><option value="expense">Despesa</option><option value="income">Receita</option></select></div>
+        </div>
+        <div class="row">
+          <div><label for="trCategoria">Categoria</label><input id="trCategoria" list="categorias" placeholder="Escolha ou digite"></div>
+          <div><label for="trData">Data</label><input id="trData" type="date"></div>
+        </div>
+        <div class="row">
+          <div><label for="trRepeticao">Repetição</label>
+            <select id="trRepeticao"><option value="unica">Única</option><option value="mensal">Mensal (fixa)</option></select></div>
+          <div><label for="trParcelas">Parcelas (opcional)</label><input id="trParcelas" type="number" min="1" max="60" placeholder="1"></div>
+        </div>
+        <datalist id="categorias">
+          <option>Alimentação</option><option>Moradia</option><option>Transporte</option><option>Saúde</option>
+          <option>Educação</option><option>Lazer</option><option>Salário</option><option>Outros</option>
+        </datalist>
+        <div class="msg" id="trMsg" role="alert"></div>
+        <button id="trAdicionar" type="button">Adicionar transação</button>
+      </section>
+
+      <section class="card">
+        <h2>Receitas e despesas nos últimos 6 meses</h2>
+        <div class="chartbox"><canvas id="grafBarras"></canvas></div>
+      </section>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Despesas por categoria</h2>
+        <p id="semCategorias" class="empty" hidden>Nenhuma despesa neste mês.</p>
+        <div class="chartbox" id="boxCategorias"><canvas id="grafCategorias"></canvas></div>
+      </section>
+
+      <section class="card">
+        <h2>Orçamento por categoria</h2>
+        <div class="inline">
+          <input id="orcCategoria" list="categorias" placeholder="Categoria">
+          <input id="orcLimite" type="number" min="1" step="0.01" placeholder="Limite R$">
+          <button id="orcDefinir" type="button">Definir</button>
+        </div>
+        <div id="listaOrcamentos"></div>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Metas de economia</h2>
+      <div class="inline">
+        <input id="metaNome" placeholder="Nome da meta">
+        <input id="metaAlvo" type="number" min="1" step="0.01" placeholder="Valor alvo R$">
+        <button id="metaCriar" type="button">Criar meta</button>
+      </div>
+      <div id="listaMetas"></div>
+    </section>
+
+    <section class="card">
+      <h2>Transações do mês</h2>
+      <div class="row">
+        <input id="filtroBusca" placeholder="Buscar por descrição ou categoria" aria-label="Buscar">
+        <select id="filtroTipo" aria-label="Filtrar tipo">
+          <option value="">Todas</option><option value="income">Receitas</option><option value="expense">Despesas</option>
+        </select>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th style="text-align:right">Valor</th><th></th></tr></thead>
+          <tbody id="corpoTabela"></tbody>
+        </table>
+      </div>
+      <p id="semTransacoes" class="empty" hidden>Nada por aqui ainda. Adicione sua primeira transação acima.</p>
+    </section>
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
