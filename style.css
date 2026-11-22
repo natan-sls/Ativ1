@@ -101,3 +101,34 @@ td.n { text-align: right; font-variant-numeric: tabular-nums; }
 .bar i { display: block; height: 100%; background: var(--ac); }
 .bar i.over { background: var(--exp); }
 .chartbox { position: relative; height: 240px; }
+
+.selo {
+  display: inline-block;
+  margin: 6px 8px 0 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  color: var(--ac-ink);
+  background: var(--ac);
+  vertical-align: middle;
+}
+.selo.pf { background: #3b7dd8; color: #fff; }
+#subtitulo { display: inline; }
+.nota { margin: -4px 0 16px; }
+.rotulo { display: block; margin-top: 10px; font-size: .85rem; color: var(--mu); }
+
+.badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  border: 1px solid var(--ln);
+  color: var(--mu);
+}
+.badge.open { color: var(--inc); border-color: var(--inc); }
+.badge.late { color: var(--exp); border-color: var(--exp); }
+button.mini { width: auto; margin: 0; padding: 4px 8px; font-size: .8rem; }
+.acoes { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }

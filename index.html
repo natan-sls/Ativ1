@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Controle Financeiro Avançado</title>
+  <title>Controle Financeiro</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="assets/favicon.ico">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -12,27 +13,90 @@
 
   <section id="auth" class="card">
     <h1>Controle Financeiro</h1>
-    <p class="empty">Entre para ver e organizar suas finanças. Os dados ficam salvos neste navegador.</p>
+    <p class="empty">No mesmo login, você pode manter carteiras pessoal (CPF) e da empresa (CNPJ), com lançamentos separados neste navegador.</p>
     <div class="tabs">
       <button id="tabEntrar" class="on" type="button">Entrar</button>
       <button id="tabCriar" type="button">Criar conta</button>
     </div>
-    <div id="campoNome" hidden>
-      <label for="authNome">Nome ou empresa</label>
-      <input id="authNome" autocomplete="name">
+
+    <div id="blocoCadastro" hidden>
+      <span class="rotulo">O que deseja gerenciar primeiro?</span>
+      <div class="tabs" id="tipoCarteira">
+        <button type="button" data-tipo="cpf" class="on">Pessoa física (CPF)</button>
+        <button type="button" data-tipo="cnpj">Empresa (CNPJ)</button>
+      </div>
+      <label id="labelNome" for="authNome">Nome completo</label>
+      <input id="authNome" autocomplete="name" placeholder="Ex.: Ana Souza">
+      <div id="campoFantasia" hidden>
+        <label for="authFantasia">Nome fantasia</label>
+        <input id="authFantasia" placeholder="Ex.: Oficina do Bairro">
+      </div>
+      <label id="labelDocumento" for="authDocumento">CPF</label>
+      <input id="authDocumento" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00">
+      <div id="campoRegime" hidden>
+        <label for="authRegime">Regime tributário</label>
+        <select id="authRegime">
+          <option value="mei">MEI</option>
+          <option value="simples" selected>Simples Nacional</option>
+          <option value="presumido">Lucro Presumido</option>
+        </select>
+      </div>
     </div>
+
     <label for="authEmail">E-mail</label>
     <input id="authEmail" type="email" autocomplete="email">
     <label for="authSenha">Senha (mínimo 6 caracteres)</label>
     <input id="authSenha" type="password" autocomplete="current-password">
     <div class="msg" id="authMsg" role="alert"></div>
     <button id="authEnviar" type="button">Entrar</button>
-    <button id="authDemo" type="button" class="ghost full">Entrar com conta de demonstração</button>
+    <button id="authDemo" type="button" class="ghost full">Ver demonstração pessoal (CPF)</button>
+    <button id="authDemoEmpresa" type="button" class="ghost full">Ver demonstração de empresa (CNPJ)</button>
+    <p class="empty">Senha das duas demonstrações: demo1234</p>
+  </section>
+
+  <section id="carteiraInicial" class="card" hidden>
+    <h1>Qual carteira deseja gerenciar?</h1>
+    <p class="empty">As carteiras pessoal (CPF) e da empresa (CNPJ) ficam separadas. Você poderá alternar entre elas na tela inicial.</p>
+    <div id="opcoesCarteiraInicial" class="tabs">
+      <button id="escolherPf" type="button">Pessoal (CPF)</button>
+      <button id="escolherPj" type="button">Empresa (CNPJ)</button>
+    </div>
+    <div id="formNovaCarteira" hidden>
+      <h2 id="tituloNovaCarteira"></h2>
+      <label id="labelNovoNome" for="novoNome"></label>
+      <input id="novoNome" autocomplete="name">
+      <div id="campoNovoFantasia" hidden>
+        <label for="novoFantasia">Nome fantasia</label>
+        <input id="novoFantasia" placeholder="Ex.: Oficina do Bairro">
+      </div>
+      <label id="labelNovoDocumento" for="novoDocumento"></label>
+      <input id="novoDocumento" inputmode="numeric" autocomplete="off">
+      <div id="campoNovoRegime" hidden>
+        <label for="novoRegime">Regime tributário</label>
+        <select id="novoRegime">
+          <option value="mei">MEI</option>
+          <option value="simples" selected>Simples Nacional</option>
+          <option value="presumido">Lucro Presumido</option>
+        </select>
+      </div>
+      <div class="msg" id="novaCarteiraMsg" role="alert"></div>
+      <button id="criarNovaCarteira" type="button">Criar carteira</button>
+      <button id="voltarOpcoesCarteira" class="ghost full" type="button">Escolher outro tipo</button>
+    </div>
+    <button id="sairEscolhaCarteira" class="ghost full" type="button">Sair</button>
   </section>
 
   <main id="app" hidden>
     <div class="top">
-      <div><h1 id="saudacao"></h1><span class="empty">Visão do mês selecionado</span></div>
+      <div>
+        <h1 id="saudacao"></h1>
+        <span class="selo" id="seloCarteira"></span>
+        <span class="empty" id="subtitulo"></span>
+        <div id="alternarCarteira" class="tabs">
+          <button type="button" data-alternar-carteira="cpf">Pessoal (CPF)</button>
+          <button type="button" data-alternar-carteira="cnpj">Empresa (CNPJ)</button>
+        </div>
+      </div>
       <div class="inline">
         <input id="mes" type="month" aria-label="Mês" style="width:auto">
         <button id="sair" class="ghost" type="button">Sair</button>
@@ -40,15 +104,33 @@
     </div>
 
     <div class="stats">
-      <div class="stat"><small>Saldo acumulado</small><b id="resAcumulado"></b></div>
-      <div class="stat"><small>Receitas do mês</small><b id="resReceitas" class="inc"></b></div>
-      <div class="stat"><small>Despesas do mês</small><b id="resDespesas" class="exp"></b></div>
-      <div class="stat"><small>Resultado do mês</small><b id="resResultado"></b></div>
+      <div class="stat"><small id="rotSaldo">Saldo acumulado</small><b id="resAcumulado"></b></div>
+      <div class="stat"><small id="rotEntrada">Receitas do mês</small><b id="resReceitas" class="inc"></b></div>
+      <div class="stat"><small id="rotSaida">Despesas do mês</small><b id="resDespesas" class="exp"></b></div>
+      <div class="stat"><small id="rotResultado">Resultado do mês</small><b id="resResultado"></b></div>
     </div>
+
+    <div class="stats" data-visao="pj" hidden>
+      <div class="stat" title="Soma do que os clientes ainda não pagaram.">
+        <small>A receber em aberto</small><b id="resReceber" class="inc"></b>
+        <small id="resAtraso" class="exp" hidden></small>
+      </div>
+      <div class="stat" title="Soma do que a empresa ainda precisa pagar.">
+        <small>A pagar em aberto</small><b id="resPagar" class="exp"></b>
+        <small id="resAtrasoPagar" class="exp" hidden></small>
+      </div>
+      <div class="stat" title="Saldo em caixa, mais o que falta receber, menos o que falta pagar.">
+        <small>Caixa projetado</small><b id="resProjetado"></b>
+      </div>
+      <div class="stat" title="Lucro do mês dividido pelo faturamento.">
+        <small>Margem do mês</small><b id="resMargem"></b>
+      </div>
+    </div>
+    <p class="empty nota" data-visao="pj" hidden>O caixa projetado junta o saldo acumulado com as contas em aberto, inclusive as de outros meses.</p>
 
     <div class="grid">
       <section class="card">
-        <h2>Nova transação</h2>
+        <h2>Novo lançamento</h2>
         <label for="trDescricao">Descrição</label>
         <input id="trDescricao" placeholder="Ex.: Mercado">
         <div class="row">
@@ -65,29 +147,30 @@
             <select id="trRepeticao"><option value="unica">Única</option><option value="mensal">Mensal (fixa)</option></select></div>
           <div><label for="trParcelas">Parcelas (opcional)</label><input id="trParcelas" type="number" min="1" max="60" placeholder="1"></div>
         </div>
-        <datalist id="categorias">
-          <option>Alimentação</option><option>Moradia</option><option>Transporte</option><option>Saúde</option>
-          <option>Educação</option><option>Lazer</option><option>Salário</option><option>Outros</option>
-        </datalist>
+        <div id="campoContato" data-visao="pj" hidden>
+          <label for="trContato">Cliente ou fornecedor</label>
+          <select id="trContato"><option value="">Nenhum</option></select>
+        </div>
+        <datalist id="categorias"></datalist>
         <div class="msg" id="trMsg" role="alert"></div>
-        <button id="trAdicionar" type="button">Adicionar transação</button>
+        <button id="trAdicionar" type="button">Adicionar lançamento</button>
       </section>
 
       <section class="card">
-        <h2>Receitas e despesas nos últimos 6 meses</h2>
+        <h2 id="tituloGrafico">Receitas e despesas nos últimos 6 meses</h2>
         <div class="chartbox"><canvas id="grafBarras"></canvas></div>
       </section>
     </div>
 
     <div class="grid">
       <section class="card">
-        <h2>Despesas por categoria</h2>
+        <h2 id="tituloCategorias">Despesas por categoria</h2>
         <p id="semCategorias" class="empty" hidden>Nenhuma despesa neste mês.</p>
         <div class="chartbox" id="boxCategorias"><canvas id="grafCategorias"></canvas></div>
       </section>
 
       <section class="card">
-        <h2>Orçamento por categoria</h2>
+        <h2 id="tituloOrcamento">Orçamento por categoria</h2>
         <div class="inline">
           <input id="orcCategoria" list="categorias" placeholder="Categoria">
           <input id="orcLimite" type="number" min="1" step="0.01" placeholder="Limite R$">
@@ -97,7 +180,7 @@
       </section>
     </div>
 
-    <section class="card">
+    <section class="card" data-visao="pf">
       <h2>Metas de economia</h2>
       <div class="inline">
         <input id="metaNome" placeholder="Nome da meta">
@@ -107,21 +190,74 @@
       <div id="listaMetas"></div>
     </section>
 
-    <section class="card">
-      <h2>Transações do mês</h2>
+    <section class="card" data-visao="pj" hidden>
+      <h2>Contas a pagar e a receber</h2>
+      <p class="empty">O combinado fica aqui até a baixa. Ao receber ou pagar, o valor entra no caixa do dia.</p>
       <div class="row">
-        <input id="filtroBusca" placeholder="Buscar por descrição ou categoria" aria-label="Buscar">
+        <div><label for="contaTipo">Tipo</label>
+          <select id="contaTipo"><option value="pagar">A pagar</option><option value="receber">A receber</option></select></div>
+        <div><label for="contaValor">Valor (R$)</label><input id="contaValor" type="number" min="0.01" step="0.01"></div>
+      </div>
+      <div class="row">
+        <div><label for="contaDesc">Descrição</label><input id="contaDesc" placeholder="Ex.: Tinta automotiva"></div>
+        <div><label for="contaVenc">Vencimento</label><input id="contaVenc" type="date"></div>
+      </div>
+      <div class="row">
+        <div><label for="contaCat">Categoria</label><input id="contaCat" list="categorias" placeholder="Escolha ou digite"></div>
+        <div><label for="contaContato">Contato</label><select id="contaContato"><option value="">Nenhum</option></select></div>
+      </div>
+      <div class="msg" id="contaMsg" role="alert"></div>
+      <button id="contaAdicionar" type="button">Adicionar conta</button>
+      <div id="listaContas"></div>
+    </section>
+
+    <div class="grid" data-visao="pj" hidden>
+      <section class="card">
+        <h2>Clientes e fornecedores</h2>
+        <div class="row">
+          <div><label for="ctNome">Nome</label><input id="ctNome" placeholder="Ex.: Ana Souza"></div>
+          <div><label for="ctTipo">Tipo</label>
+            <select id="ctTipo"><option value="cliente">Cliente</option><option value="fornecedor">Fornecedor</option></select></div>
+        </div>
+        <label for="ctFone">Telefone (opcional)</label>
+        <input id="ctFone" placeholder="(00) 00000-0000">
+        <div class="msg" id="ctMsg" role="alert"></div>
+        <button id="ctCriar" type="button">Adicionar contato</button>
+        <div id="listaContatos"></div>
+      </section>
+
+      <section class="card">
+        <h2>Reserva de impostos</h2>
+        <p class="empty">Serve para o caixa não tratar imposto como sobra. Não substitui a guia do DAS, do Simples Nacional nem a apuração do contador.</p>
+        <div id="taxMei">
+          <label for="taxDas">Valor da guia do mês (R$)</label>
+          <input id="taxDas" type="number" min="0" step="0.01" placeholder="Ex.: 75,90">
+        </div>
+        <div id="taxAliquota">
+          <label for="taxRate">Alíquota estimada sobre o faturamento (%)</label>
+          <input id="taxRate" type="number" min="0" max="100" step="0.01">
+          <p id="taxEstimado" class="empty"></p>
+        </div>
+        <div class="msg" id="taxMsg" role="alert"></div>
+        <button id="taxLancar" type="button">Lançar no mês selecionado</button>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2 id="tituloTabela">Transações do mês</h2>
+      <div class="row">
+        <input id="filtroBusca" placeholder="Buscar por descrição, categoria ou contato" aria-label="Buscar">
         <select id="filtroTipo" aria-label="Filtrar tipo">
           <option value="">Todas</option><option value="income">Receitas</option><option value="expense">Despesas</option>
         </select>
       </div>
       <div class="scroll">
         <table>
-          <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th style="text-align:right">Valor</th><th></th></tr></thead>
+          <thead id="cabecaTabela"></thead>
           <tbody id="corpoTabela"></tbody>
         </table>
       </div>
-      <p id="semTransacoes" class="empty" hidden>Nada por aqui ainda. Adicione sua primeira transação acima.</p>
+      <p id="semTransacoes" class="empty" hidden>Nada por aqui ainda. Adicione o primeiro lançamento acima.</p>
     </section>
   </main>
 </div>
